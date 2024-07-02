@@ -1,0 +1,29 @@
+name: Enforce Master from Staging
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  check-master:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout master
+      uses: actions/checkout@v2
+      with:
+        ref: master
+
+    - name: Checkout staging
+      uses: actions/checkout@v2
+      with:
+        ref: staging
+        path: staging
+
+    - name: Compare branches
+      run: |
+        if ! git diff --quiet HEAD staging/master; then
+          echo "Master has commits that are not in staging!"
+          exit 1
+        fi
