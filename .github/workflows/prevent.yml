@@ -23,7 +23,14 @@ jobs:
           if [[ "$SOURCE_BRANCH" != "master" && "$SOURCE_BRANCH" != "staging" && "$TARGET_BRANCH" == "staging" ]] || [[ "$SOURCE_BRANCH" == "staging" && "$TARGET_BRANCH" == "master" ]]; then
             echo "PR validation passed."
           else
-            echo "PR validation failed. PR should be from any branch except master and staging to staging, or from staging to master."
+            echo "PR Validation Failed
+            Your pull request (PR) must be from your feature branch to the staging branch. After merging to staging, you should open a PR to merge staging into master.
+            
+            Reasons:
+            Testing: Your changes need to be tested in the staging (non-prod) environment before merging to master. Use this URL for testing: Staging App.
+            DB Migrations: Database migrations should first run in the staging environment (non-prod) and only afterwards in the master.
+            
+            Please correct the source and target branches of your pull request accordingly."
             exit 1
           fi
           
