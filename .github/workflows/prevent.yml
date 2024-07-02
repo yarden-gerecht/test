@@ -1,29 +1,29 @@
-name: Enforce Master from Staging
+name: PR Validation
 
 on:
-  push:
+  pull_request:
     branches:
       - master
+      - staging
 
 jobs:
-  check-master:
+  validate-pr:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout master
-      uses: actions/checkout@v2
-      with:
-        ref: master
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Validate PR
+        run: |
+          # Get the source and target branches
+          SOURCE_BRANCH="${{ github.event.pull_request.head.ref }}"
+          TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
 
-    - name: Checkout staging
-      uses: actions/checkout@v2
-      with:
-        ref: staging
-        path: staging
-
-    - name: Compare branches
-      run: |
-        if ! git diff --quiet HEAD staging/master; then
-          echo "Master has commits that are not in staging!"
-          exit 1
-        fi
+          # Check if the PR is from a non-master, non-staging branch to staging, or from staging to master
+          if [[ "$SOURCE_BRANCH" != "master" && "$SOURCE_BRANCH" != "staging" && "$TARGET_BRANCH" == "staging" ]] || [[ "$SOURCE_BRANCH" == "staging" && "$TARGET_BRANCH" == "master" ]]; then
+            echo "PR validation passed."
+          else
+            echo "PR validation failed. PR should be from any branch except master and staging to staging, or from staging to master."
+            exit 1
+          fi
+          
